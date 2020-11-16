@@ -20,8 +20,8 @@ public class Member {
     @JoinColumn(name = "team_id")
     private Team team;
 
-    public Member(String username) {
-        this(username, 0, null);
+    public Member(String username, int age) {
+        this(username, age, null);
     }
 
     public Member(String username, int age, Team team) {
