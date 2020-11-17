@@ -66,6 +66,7 @@ public class QuerydslBasicTest {
         //QMember m = new QMember("m");
         //QMember m = QMember.member;
 
+        //같은 테이블을 조인해야 하는 경우가 아니면 기본 인스턴스를 사용
         Member findMember = queryFactory
                 .select(member)
                 .from(member)
@@ -101,27 +102,32 @@ public class QuerydslBasicTest {
     
     @Test
     public void resultFetchTest() {
-//        List<Member> fetch =
-//                queryFactory
-//                .selectFrom(member)
-//                .fetch();
-//
-//        Member fetchOne = queryFactory
-//                .selectFrom(QMember.member)
-//                .fetchOne();
-//
-//        Member fetchFirst = queryFactory
-//                .selectFrom(QMember.member)
-//                // = .limit(1).fetchOne()
-//                .fetchFirst();
+        //List
+        List<Member> fetch =
+                queryFactory
+                .selectFrom(member)
+                .fetch();
 
-//        QueryResults<Member> results = queryFactory
-//                .selectFrom(member)
-//                .fetchResults();
-//
-//        results.getTotal();
-//        List<Member> content = results.getResults();
+        //단건
+        Member fetchOne = queryFactory
+                .selectFrom(QMember.member)
+                .fetchOne();
 
+        //처음 한 건 조회
+        Member fetchFirst = queryFactory
+                .selectFrom(QMember.member)
+                // = .limit(1).fetchOne()
+                .fetchFirst();
+
+        //페이징에서 사용
+        QueryResults<Member> results = queryFactory
+                .selectFrom(member)
+                .fetchResults();
+
+        results.getTotal();
+        List<Member> content = results.getResults();
+
+        //count 쿼리로 변경
         long total = queryFactory
                 .selectFrom(member)
                 .fetchCount();
@@ -159,8 +165,8 @@ public class QuerydslBasicTest {
         List<Member> result = queryFactory
                 .selectFrom(member)
                 .orderBy(member.username.desc())
-                .offset(1)
-                .limit(2)
+                .offset(1) //0부터 시작(zero index)
+                .limit(2) //최대 2건 조회
                 .fetch();
 
         assertThat(result.size()).isEqualTo(2);
