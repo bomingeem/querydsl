@@ -4,6 +4,7 @@ import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.assertj.core.api.Assertions;
@@ -254,6 +255,8 @@ public class QuerydslBasicTest {
 
     /**
      * 세타 조인
+     * 연관관계가 없는 필드로 조인
+     * 외부 조인 불가능
      * 회원의 이름이 팀 이름과 같은 회원을 조회
      */
     @Test
@@ -261,7 +264,7 @@ public class QuerydslBasicTest {
         em.persist(new Member("teamA"));
         em.persist(new Member("teamB"));
         em.persist(new Member("teamC"));
-
+        
         List<Member> result = queryFactory
                 .select(member)
                 .from(member, team)
@@ -314,6 +317,9 @@ public class QuerydslBasicTest {
     @PersistenceUnit
     EntityManagerFactory emf;
 
+    /**
+     * 지연로딩으로 Member, Team SQL 쿼리 각각 실행
+     */
     @Test
     public void fetchJoinNo() {
         em.flush();
@@ -328,6 +334,9 @@ public class QuerydslBasicTest {
         assertThat(loaded).as("페치 조인 미적용").isFalse();
     }
 
+    /**
+     * 즉시로딩으로 Member, Team SQL 쿼리 조인으로 한번에 조회
+     */
     @Test
     public void fetchJoinUse() {
         em.flush();
@@ -344,12 +353,14 @@ public class QuerydslBasicTest {
     }
 
     /**
+     * com.querydsl.JPAExpressions 사용
      * 나이가 가장 많은 회원 조회
      */
     @Test
     public void subQuery() {
 
         QMember memberSub = new QMember("memberSub");
+
         List<Member> result = queryFactory
                 .selectFrom(member)
                 .where(member.age.eq(
@@ -382,12 +393,13 @@ public class QuerydslBasicTest {
     }
 
     /**
+     * 서브쿼리 여러 건 처리, in 사용
      * 나이가 평균 이상인 회원
      */
     @Test
     public void subQueryIn() {
-
         QMember memberSub = new QMember("memberSub");
+
         List<Member> result = queryFactory
                 .selectFrom(member)
                 .where(member.age.in(
@@ -447,6 +459,30 @@ public class QuerydslBasicTest {
         }
     }
 
+    /**
+     * Querydsl은 자바 코드로 작성하기 때문에 rankPath처럼 복잡한 조건을 변수로 선언해서 select절, orderBy절에서 함께 사용할 수 있다
+     */
+    @Test
+    public void orderByCase() {
+        NumberExpression<Integer> rankPath = new CaseBuilder()
+                .when(member.age.between(0, 20)).then(2)
+                .when(member.age.between(21, 30)).then(1)
+                .otherwise(3);
+
+        List<Tuple> result = queryFactory
+                .select(member.username, member.age, rankPath)
+                .from(member)
+                .orderBy(rankPath.desc())
+                .fetch();
+
+        for (Tuple tuple : result) {
+            String username = tuple.get(member.username);
+            Integer age = tuple.get(member.age);
+            Integer rank = tuple.get(rankPath);
+            System.out.println("username = " + username + " age = " + age + " rank = " + rank);
+        }
+    }
+
     @Test
     public void constant() {
         List<Tuple> result = queryFactory
@@ -459,6 +495,10 @@ public class QuerydslBasicTest {
         }
     }
 
+    /**
+     * 문자가 아닌 다른 타입들은 stringValue()로 문자로 변환할 수 있다.
+     * 이 방법은 ENUM 을 처리할 때도 자주 사용
+     */
     @Test
     public void concat() {
         //{username}_{age}
