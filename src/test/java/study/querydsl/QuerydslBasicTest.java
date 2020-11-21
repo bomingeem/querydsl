@@ -659,7 +659,12 @@ public class QuerydslBasicTest {
                 .where(builder)
                 .fetch();
     }
-    
+
+    /**
+     * where 조건에 null값은 무시된다
+     * 메서드를 다른 쿼리에서도 재활용 할 수 있다
+     * 쿼리 자체의 가독성이 높아진다
+     */
     @Test
     public void dynamicQuery_WhereParam() {
         String usernameParam = "member1";
@@ -745,6 +750,9 @@ public class QuerydslBasicTest {
                 .fetchFirst();
     }
 
+    /**
+     * lower 같은 ansi 표준 함수들은 querydsl이 상당부분 내장하고 있다
+     */
     @Test
     public void sqlFunction2() {
         List<String> result = queryFactory
