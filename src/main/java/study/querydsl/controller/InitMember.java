@@ -26,6 +26,7 @@ public class InitMember {
 
     @Component
     static class InitMemberService {
+
         @PersistenceContext
         private EntityManager em;
 
