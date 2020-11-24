@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.stereotype.Repository;
 import study.querydsl.dto.MemberSearchCondition;
 import study.querydsl.entity.Member;
 import study.querydsl.entity.QMember;
@@ -18,6 +19,7 @@ import static org.springframework.util.StringUtils.hasText;
 import static study.querydsl.entity.QMember.*;
 import static study.querydsl.entity.QTeam.team;
 
+@Repository
 public class MemberTestRepository extends Querydsl4RepositorySupport {
 
     public MemberTestRepository() {
