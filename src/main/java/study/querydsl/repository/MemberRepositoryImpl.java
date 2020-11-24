@@ -71,6 +71,10 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         return new PageImpl<>(content, pageable, total);
     }
 
+    /**
+     * 복잡한 페이징
+     * 데이터 조회 쿼리와 전체 카운트 쿼리를 분리
+     */
     @Override
     public Page<MemberTeamDto> searchPageComplex(MemberSearchCondition condition, Pageable pageable) {
         List<MemberTeamDto> content = queryFactory
